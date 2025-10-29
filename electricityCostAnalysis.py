@@ -1,16 +1,9 @@
-from helperFunctions import getService
 from datetime import date
 from datetime import datetime
 import pandas as pd
 import numpy as np
 
-import matplotlib.pyplot as plt
-import mplcursors
-
-from helperFunctions import read_goteborg_energy_data
-
 def main():
-    goteborg_energy_data = read_goteborg_energy_data()
     pv_data = pd.read_csv('electricityData/isolarcloud_hourly_data.csv',
                           na_values=["--"], 
                           parse_dates=[0])
@@ -31,45 +24,6 @@ def main():
 
     #plt.show()
 
-    sheetsService = getService('sheets', 'sheets')
-    SPREADSHEET_ID = '1Ri5v7YdwrUEKNGNyvFM6mDyWAjiKzwjwZ1VWCAMl6ds'
-
-    expenses = sheetsService.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID,
-                                                         range='Utgifter!A:F').execute()['values']
-    prevMonth = 0
-    prevYear = datetime.fromisoformat('2025-01-01').year
-    totalCost = 0
-    electricityCosts = {prevYear: [0] * 12}
-
-    for iExpense, expense in enumerate(expenses[1:]):
-        date = datetime.fromisoformat(expense[0])
-
-        if (date.month != prevMonth and iExpense != 0) or iExpense == len(expenses)-1:
-            if date.year != prevYear:
-                electricityCosts[prevYear][prevMonth - 1] = totalCost
-
-                electricityCosts[date.year] = [0] * 12
-
-                plt.plot(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
-                         electricityCosts[prevYear], label=prevYear)
-
-                prevYear = date.year
-            else:
-                electricityCosts[date.year][prevMonth-1] = totalCost
-
-            totalCost = 0
-        prevMonth = date.month
-
-        receiver = expense[1]
-        cost = expense[3]
-        if any([receiver == eReceiver for eReceiver in ['Tibber', 'Göteborg Energi']]):
-            totalCost += float(cost)
-
-    plt.legend()
-
-    mplcursors.cursor(hover=True)
-
-    plt.show()
 
 def process_hourly_data(tibber_data, pv_data, ev_data):
     # Create hourly_data DataFrame from tibber_data
