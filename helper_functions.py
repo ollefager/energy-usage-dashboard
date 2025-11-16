@@ -6,21 +6,60 @@ def get_pv_data():
     pv_data = pd.read_csv('electricityData/isolarcloud_hourly_data.csv',
                           na_values=["--"],
                           parse_dates=[0])
+
+    # Check a problematic column
+    problemColumn = 'Battery SOC(%)'
+
+    # Strip whitespace
+    pv_data[problemColumn] = pv_data[problemColumn].str.strip()
+
+    # Optional: view unique values and types
+    print(pv_data[problemColumn].apply(type).value_counts())
+    print(pv_data[problemColumn].unique())
+
+    # Convert to numeric
+    pv_data[problemColumn] = pd.to_numeric(pv_data[problemColumn], errors='coerce')
+
+    # Optionally drop NaNs if conversion failed
+    pv_data = pv_data.dropna(subset=[problemColumn])
+
+    # Now it's safe to convert to int
+    pv_data[problemColumn] = pv_data[problemColumn].astype('int64')
+
     pv_data_new = pd.DataFrame()
     pv_data_new['time'] = pd.to_datetime(pv_data['Time'])
     pv_data_new['load_w'] = pv_data['Load(W)']
+    pv_data_new['load_kwh'] = pv_data_new['load_w'] * (5 / 60) / 1000
+    # pv_data_new['heating_w'] = pv_data['Load(W)']
+    # pv_data_new['heating_w'][pv_data['Load(W)'].diff() < 2000] = None
+    # pv_data_new['heating_w'].iloc[0] = None
+    # pv_data_new['heating_w'] = pv_data_new['heating_w'].ffill()
+    # pv_data_new['heating_w'][pv_data['Load(W)'] < 2000] = 0
+    # pv_data_new['base_load_w'] = pv_data_new['load_w'] - pv_data_new['heating_w']
     pv_data_new['base_load_w'] = pv_data['Load(W)']
-    pv_data_new['base_load_w'][pv_data['Load(W)'] >= 2000] = None
+    pv_data_new.loc[pv_data['Load(W)'] >= 2000, 'base_load_w'] = None
     pv_data_new['base_load_w'] = pv_data_new['base_load_w'].ffill()
-    pv_data_new['load_kwh'] = pv_data['Load(W)'] * (5 / 60) / 1000
     pv_data_new['base_load_kwh'] = pv_data_new['base_load_w'] * (5 / 60) / 1000
     pv_data_new['battery_soc'] = pv_data['Battery SOC(%)']
     pv_data_new['grid_bought_w'] = pv_data['Grid(W)'].clip(lower=0)
+    pv_data_new['grid_bought_kwh'] = pv_data_new['grid_bought_w'] * (5 / 60) / 1000
     pv_data_new['grid_sold_w'] = np.abs(pv_data['Grid(W)'].clip(upper=0))
+    pv_data_new['grid_sold_kwh'] = pv_data_new['grid_sold_w'] * (5 / 60) / 1000
     pv_data_new['pv_w'] = pv_data['PV(W)']
-    pv_data_new['battery_charged_w'] = pv_data['Battery(W)'].clip(lower=0)
-    pv_data_new['battery_discharged_w'] = np.abs(pv_data['Battery(W)'].clip(upper=0))
+    pv_data_new['pv_kwh'] = pv_data_new['pv_w'] * (5 / 60) / 1000
+    pv_data_new['battery_discharged_w'] = pv_data['Battery(W)'].clip(lower=0)
+    pv_data_new['battery_discharged_kwh'] = pv_data_new['battery_discharged_w'] * (5 / 60) / 1000
+    pv_data_new['battery_charged_w'] = np.abs(pv_data['Battery(W)'].clip(upper=0))
+    pv_data_new['battery_charged_kwh'] = pv_data_new['battery_charged_w'] * (5 / 60) / 1000
     pv_data_new['consumed_production_w'] = pv_data_new['pv_w'] + pv_data_new['battery_discharged_w'] - pv_data_new['grid_sold_w'] - pv_data_new['battery_charged_w']
+    pv_data_new['consumed_production_kwh'] = pv_data_new['consumed_production_w'] * (5 / 60) / 1000
+    pv_data_new['pv_excess_w'] = pv_data_new['pv_w'] - pv_data_new['load_w']
+    pv_data_new['pv_excess_w'] = pv_data_new['pv_excess_w'].clip(lower=0)
+    pv_data_new['battery_charged_grid_w'] = pv_data_new['pv_excess_w'] - pv_data_new['battery_charged_w']
+    pv_data_new['battery_charged_grid_w'] = np.abs(pv_data_new['battery_charged_grid_w'].clip(upper=0))
+    pv_data_new['battery_charged_grid_kwh'] = pv_data_new['battery_charged_grid_w'] * (5 / 60) / 1000
+    pv_data_new['load_diff_w'] = pv_data_new['load_w'] - pv_data_new['pv_w'] - pv_data_new['battery_discharged_w'] - pv_data_new['grid_bought_w']
+    pv_data_new['load_diff_kwh'] = pv_data_new['load_diff_w'] * (5 / 60) / 1000
 
     pv_data_new = pv_data_new.set_index('time')
 
@@ -82,8 +121,8 @@ def get_ev_data():
 
         session_df_new = pd.DataFrame()
         session_df_new["time"] = timestamps
-        session_df_new["energy_kwh"] = energy_per_hour
-        session_df_new["power_kw"] = session_df["charging power (kW)"].values
+        session_df_new["charging_kwh"] = energy_per_hour
+        session_df_new["charging_kw"] = session_df["charging power (kW)"].values
 
         return session_df_new.set_index("time")
 

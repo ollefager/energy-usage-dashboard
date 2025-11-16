@@ -33,3 +33,5 @@ for i in range(n_col):
                                          value=[dt(startDate.year, startDate.month, startDate.day), dt(endDate.year, endDate.month, endDate.day)])
 
         st.line_chart(pv_data[startTime:endTime], y=['load_w', 'base_load_w'])
+        st.line_chart(pv_data[startTime:endTime], y=['pv_w', 'battery_discharged_w', 'battery_charged_w', 'load_w', 'grid_bought_w'])
+        st.line_chart(pv_data[startTime:endTime], y=['load_diff_kwh'])
