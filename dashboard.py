@@ -1,17 +1,12 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime as dt
-from datetime import timedelta
 import requests
 import io
-import pickle
-
-from helper_functions import *
 
 st.title("Energy Usage Dashboard")
 
 github_token = st.secrets["github_token"]
-data_storage_url = "https://api.github.com/repos/ollefager/data-storage/contents/pv_data.pkl?ref=main"
+data_storage_url = "https://api.github.com/repos/ollefager/data-storage/contents"
 
 headers = {
     "Authorization": f"token {github_token}",
