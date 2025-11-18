@@ -1,9 +1,5 @@
 import streamlit as st
-import pandas as pd
-from datetime import datetime as dt
 from datetime import timedelta as td
-import plotly.graph_objects as go
-from streamlit_plotly_events import plotly_events
 
 st.header("Daily Energy Usage")
 
