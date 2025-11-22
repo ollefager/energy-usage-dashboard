@@ -1,7 +1,6 @@
 import streamlit as st
-import plotly.graph_objects as go
 
-from pages.helper_functions import plot
+from pages.helper_functions import line_plot
 
 st.header("Monthly Energy Usage")
 
