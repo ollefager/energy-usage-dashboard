@@ -32,7 +32,7 @@ for field in cost_fields:
 fig.update_layout(
     title="Cost",
     hovermode="closest",
-    legend=dict(orientation="h"),
+    legend=dict(orientation="h", y=-0.10),
     margin=dict(l=0, r=0, t=40, b=80),
     height=500,
 )
