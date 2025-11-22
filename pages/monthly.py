@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 
-from helper_functions import get_screen_orientation
+from pages.helper_functions import get_screen_orientation
 
 st.header("Monthly Energy Usage")
 
