@@ -8,7 +8,7 @@ hourly_data = st.session_state.hourly_data
 daily_data = hourly_data.resample('d').sum()
 monthly_data = hourly_data.resample('ME').sum()
 
-plot(monthly_data, ['heating_cost', 'charging_cost', 'base_cost', 'total_cost', 'battery_charge_cost'])
+line_plot(monthly_data, ['heating_cost', 'charging_cost', 'base_cost', 'total_cost', 'battery_charge_cost'])
 
 st.line_chart(monthly_data, y=['heating_cost', 'charging_cost', 'base_cost', 'total_cost', 'battery_charge_cost'])
 
