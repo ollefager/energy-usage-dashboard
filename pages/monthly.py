@@ -1,12 +1,11 @@
 import streamlit as st
+import plotly.graph_objects as go
 
 st.header("Monthly Energy Usage")
 
 hourly_data = st.session_state.hourly_data
 daily_data = hourly_data.resample('d').sum()
 monthly_data = hourly_data.resample('ME').sum()
-
-import plotly.graph_objects as go
 
 # Assuming `monthly_data` is a DataFrame and has a DateTimeIndex or 'date' column
 # If not, update accordingly
@@ -26,21 +25,16 @@ for field in cost_fields:
         name=field.replace("_", " ").title(),
         marker=dict(size=6),
         line=dict(width=2),
+        hoverinfo='y',
     ))
 
 # Make it mobile-friendly
 fig.update_layout(
-    title="Monthly Cost Breakdown",
-    hovermode="x unified",
-    xaxis_title="Month",
-    yaxis_title="Cost (€)",
-    xaxis=dict(
-        tickangle=-45,
-        tickformat="%b %Y"  # Optional: if datetime is used
-    ),
-    legend=dict(orientation="h", y=-0.3),
-    margin=dict(l=10, r=10, t=40, b=10),
-    height=450,
+    title="Cost",
+    hovermode="closest",
+    legend=dict(orientation="h"),
+    margin=dict(l=0, r=0, t=40, b=80),
+    height=500,
 )
 
 st.plotly_chart(fig, use_container_width=True)
