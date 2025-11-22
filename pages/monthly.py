@@ -17,9 +17,9 @@ plot_selection = st.pills(
 
 match plot_selection:
     case "Cost":
-        df_plot(monthly_data, ['heating_cost', 'charging_cost', 'base_cost', 'total_cost'], y_label='SEK')
+        df_plot(monthly_data, column_names=['heating_cost', 'charging_cost', 'base_cost', 'total_cost'], y_label='SEK')
     case "Solar gain":
-        df_plot(monthly_data, ['pv_total_gain', 'pv_sold', 'pv_saved_cost'], y_label='SEK')
+        df_plot(monthly_data, column_names=['pv_total_gain', 'pv_sold', 'pv_saved_cost'], y_label='SEK')
     case "YoY":
         option = st.selectbox('Data', monthly_data.columns, index=1, label_visibility='collapsed')
 
