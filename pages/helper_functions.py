@@ -1,15 +1,36 @@
-from streamlit_js_eval import streamlit_js_eval
+import plotly.graph_objects as go
+import streamlit as st
 
 
-def get_screen_orientation():
+def plot(data, column_names):
+    fig = go.Figure()
 
-    width = streamlit_js_eval(js_expressions='screen.width')
-    height = streamlit_js_eval(js_expressions='screen.height')
+    for col_name in column_names:
+        fig.add_trace(go.Scatter(
+            x=data.index,
+            y=data[col_name],
+            mode="lines+markers",
+            name=col_name.replace("_", " ").title(),
+            marker=dict(size=6),
+            line=dict(width=2),
+            hoverinfo='y',
+        ))
 
-    if width > height:
-        orientation = 'landscape'
+    if st.session_state.device_type == 'phone':
+        hover_mode = 'closest'
+        legend = dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=1)
+        margin = dict(l=0, r=0, t=100, b=80)
     else:
-        orientation = 'portrait'
+        hover_mode = 'x unified'
+        legend = dict(orientation="h")
+        margin = dict(l=0, r=0, t=40, b=80)
 
-    return orientation
+    fig.update_layout(
+        title="Cost",
+        hovermode=hover_mode,
+        legend=legend,
+        margin=margin,
+        height=500,
+    )
 
+    st.plotly_chart(fig, use_container_width=True)

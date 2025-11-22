@@ -32,16 +32,17 @@ if 'hourly_data' not in st.session_state:
     hourly_data_bytes = io.BytesIO(requests.get(data_storage_url + '/hourly_data.pkl?ref=main', headers=headers).content)
     st.session_state.hourly_data = pd.read_pickle(hourly_data_bytes)
 
-# Get user agent string
-user_agent = streamlit_js_eval(js_expressions="navigator.userAgent", key="ua")
+if 'device_type' not in st.session_state:
+    user_agent = streamlit_js_eval(js_expressions="navigator.userAgent", key="ua")
 
-st.write(user_agent)
-
-# Detect if it's a phone
-is_phone = False
-if user_agent:
-    user_agent = user_agent.lower()
-    is_phone = any(keyword in user_agent for keyword in ['iphone', 'android', 'mobile'])
+    if user_agent:
+        user_agent = user_agent.lower()
+        if any(keyword in user_agent.lower() for keyword in ['iphone', 'android', 'mobile']):
+            st.session_state.device_type = 'phone'
+        else:
+            st.session_state.device_type = 'computer'
+    else:
+        st.session_state.device_type = 'phone'
 
 pages = [st.Page("pages/home.py", title="Home"),
          st.Page("pages/monthly.py", title="Monthly energy usage"),

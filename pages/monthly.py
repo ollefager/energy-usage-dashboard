@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 
-from pages.helper_functions import get_screen_orientation
+from pages.helper_functions import plot
 
 st.header("Monthly Energy Usage")
 
@@ -9,39 +9,7 @@ hourly_data = st.session_state.hourly_data
 daily_data = hourly_data.resample('d').sum()
 monthly_data = hourly_data.resample('ME').sum()
 
-st.write(get_screen_orientation())
-
-# Assuming `monthly_data` is a DataFrame and has a DateTimeIndex or 'date' column
-# If not, update accordingly
-x = monthly_data.index if monthly_data.index.name else monthly_data['date']
-
-fig = go.Figure()
-
-# List of fields to plot
-cost_fields = ['heating_cost', 'charging_cost', 'base_cost', 'total_cost', 'battery_charge_cost']
-
-# Add each cost field as a line
-for field in cost_fields:
-    fig.add_trace(go.Scatter(
-        x=x,
-        y=monthly_data[field],
-        mode="lines+markers",
-        name=field.replace("_", " ").title(),
-        marker=dict(size=6),
-        line=dict(width=2),
-        hoverinfo='y',
-    ))
-
-# Make it mobile-friendly
-fig.update_layout(
-    title="Cost",
-    hovermode="closest",
-    legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=1),
-    margin=dict(l=0, r=0, t=100, b=80),
-    height=500,
-)
-
-st.plotly_chart(fig, use_container_width=True)
+plot(monthly_data, ['heating_cost', 'charging_cost', 'base_cost', 'total_cost', 'battery_charge_cost'])
 
 st.line_chart(monthly_data, y=['heating_cost', 'charging_cost', 'base_cost', 'total_cost', 'battery_charge_cost'])
 
