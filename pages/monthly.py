@@ -1,6 +1,6 @@
 import streamlit as st
 
-from pages.helper_functions import line_plot
+from pages.helper_functions import df_plot
 
 st.header("Monthly Energy Usage")
 
@@ -8,7 +8,7 @@ hourly_data = st.session_state.hourly_data
 daily_data = hourly_data.resample('d').sum()
 monthly_data = hourly_data.resample('ME').sum()
 
-line_plot(monthly_data, ['heating_cost', 'charging_cost', 'base_cost', 'total_cost', 'battery_charge_cost'])
+df_plot(monthly_data, ['heating_cost', 'charging_cost', 'base_cost', 'total_cost', 'battery_charge_cost'])
 
 st.line_chart(monthly_data, y=['heating_cost', 'charging_cost', 'base_cost', 'total_cost', 'battery_charge_cost'])
 

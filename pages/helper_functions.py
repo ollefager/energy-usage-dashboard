@@ -2,7 +2,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 
-def line_plot(data, column_names):
+def df_plot(data, column_names):
     fig = go.Figure()
 
     for col_name in column_names:
