@@ -33,7 +33,7 @@ fig.update_layout(
     title="Cost",
     hovermode="closest",
     legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=1),
-    margin=dict(l=0, r=0, t=40, b=80),
+    margin=dict(l=0, r=0, t=100, b=80),
     height=500,
 )
 
