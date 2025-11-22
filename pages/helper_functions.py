@@ -2,15 +2,23 @@ import plotly.graph_objects as go
 import streamlit as st
 
 
-def df_plot(data, column_names):
+def df_plot(data, column_names=None, title=None, y_label=None):
     fig = go.Figure()
 
+    if column_names is None:
+        column_names = data.columns
+
     for col_name in column_names:
+        if col_name is str:
+            legend_name = col_name.replace("_", " ").title()
+        else:
+            legend_name = str(col_name)
+
         fig.add_trace(go.Scatter(
             x=data.index,
             y=data[col_name],
             mode="lines+markers",
-            name=col_name.replace("_", " ").title(),
+            name=legend_name,
             marker=dict(size=6),
             line=dict(width=2),
             hoverinfo='y',
@@ -23,14 +31,20 @@ def df_plot(data, column_names):
     else:
         hover_mode = 'x unified'
         legend = dict(orientation="h")
-        margin = dict(l=0, r=0, t=40, b=80)
+        margin = dict(l=0, r=0, t=0, b=80)
 
     fig.update_layout(
-        title="Cost",
         hovermode=hover_mode,
         legend=legend,
         margin=margin,
-        height=500,
+        height=500
     )
+
+    if title is not None:
+        margin.t = 40
+        fig.update_layout(title=title, margin=margin)
+
+    if y_label is not None:
+        fig.update_layout(yaxis=dict(title=dict(text=y_label)))
 
     st.plotly_chart(fig, use_container_width=True)
