@@ -1,11 +1,15 @@
 import streamlit as st
 import plotly.graph_objects as go
 
+from helper_functions import get_screen_orientation
+
 st.header("Monthly Energy Usage")
 
 hourly_data = st.session_state.hourly_data
 daily_data = hourly_data.resample('d').sum()
 monthly_data = hourly_data.resample('ME').sum()
+
+st.write(get_screen_orientation())
 
 # Assuming `monthly_data` is a DataFrame and has a DateTimeIndex or 'date' column
 # If not, update accordingly
