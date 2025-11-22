@@ -1,7 +1,10 @@
 import streamlit as st
+from streamlit_js_eval import streamlit_js_eval
+
 import pandas as pd
 import requests
 import io
+
 
 st.title("Energy Usage Dashboard")
 
@@ -28,6 +31,17 @@ if 'tibber_data' not in st.session_state:
 if 'hourly_data' not in st.session_state:
     hourly_data_bytes = io.BytesIO(requests.get(data_storage_url + '/hourly_data.pkl?ref=main', headers=headers).content)
     st.session_state.hourly_data = pd.read_pickle(hourly_data_bytes)
+
+# Get user agent string
+user_agent = streamlit_js_eval(js_expressions="navigator.userAgent", key="ua")
+
+st.write(user_agent)
+
+# Detect if it's a phone
+is_phone = False
+if user_agent:
+    user_agent = user_agent.lower()
+    is_phone = any(keyword in user_agent for keyword in ['iphone', 'android', 'mobile'])
 
 pages = [st.Page("pages/home.py", title="Home"),
          st.Page("pages/monthly.py", title="Monthly energy usage"),
