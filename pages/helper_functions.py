@@ -8,6 +8,11 @@ def df_plot(data, column_names=None, title=None, y_label=None):
     if column_names is None:
         column_names = data.columns
 
+    if len(data.index) < 50:
+        line_mode = 'lines+markers'
+    else:
+        line_mode = 'lines'
+
     for col_name in column_names:
         if col_name is str:
             legend_name = col_name.replace("_", " ").title()
@@ -17,15 +22,15 @@ def df_plot(data, column_names=None, title=None, y_label=None):
         fig.add_trace(go.Scatter(
             x=data.index,
             y=data[col_name],
-            mode="lines+markers",
+            mode=line_mode,
             name=legend_name,
             marker=dict(size=6),
             line=dict(width=2),
-            hoverinfo='y',
+            hoverinfo='y+x',
         ))
 
     if st.session_state.device_type == 'phone':
-        hover_mode = 'closest'
+        hover_mode = 'x'
         legend = dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=1)
         margin = dict(l=0, r=0, t=100, b=80)
     else:

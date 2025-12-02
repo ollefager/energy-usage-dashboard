@@ -36,15 +36,19 @@ if 'hourly_data' not in st.session_state:
 if 'device_type' not in st.session_state:
     user_agent = streamlit_js_eval(js_expressions="navigator.userAgent", key="ua")
     time.sleep(1)  # wait so that user_agent gets a value, should be after for some reason...
+    user_agent = None
 
     if user_agent:
         user_agent = user_agent.lower()
         if any(keyword in user_agent.lower() for keyword in ['iphone', 'android', 'mobile']):
             st.session_state.device_type = 'phone'
+            st.session_state.max_datapoints = 100
         else:
             st.session_state.device_type = 'computer'
+            st.session_state.max_datapoints = 1000
     else:
         st.session_state.device_type = 'phone'
+        st.session_state.max_datapoints = 100
 
 pages = [st.Page("pages/home.py", title="Home"),
          st.Page("pages/monthly.py", title="Monthly energy usage"),
