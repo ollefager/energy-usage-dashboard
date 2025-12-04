@@ -30,37 +30,39 @@ if st.session_state.device_type == 'phone':
                                min_value=earliest_date,
                                max_value=latest_date)
         
-    if 'start_date' not in st.session_state or st.session_state.start_date != start_date:
-        st.session_state.slider_min = start_date
-        st.session_state.start_date = start_date
-        st.session_state.slider_max = min(latest_date.date(), start_date + max_days)
+    if 'start_date_daily' not in st.session_state or st.session_state.start_date_daily != start_date:
+        st.session_state.slider_min_daily = start_date
+        st.session_state.start_date_daily = start_date
+        st.session_state.slider_max_daily = min(latest_date.date(), start_date + max_days)
 else:
-    st.session_state.slider_min = earliest_date
-    st.session_state.slider_max = latest_date
+    if 'slider_min_daily' not in st.session_state:
+        st.session_state.slider_min_daily = earliest_date
+        st.session_state.slider_max_daily = latest_date
 
-st.session_state.slider_val = [st.session_state.slider_min, st.session_state.slider_max]
+st.session_state.slider_val_daily = [st.session_state.slider_min_daily, st.session_state.slider_max_daily]
 
 [start_time, end_time] = st.slider(label='Time interval',
                                    key='slider_daily',
-                                   min_value=st.session_state.slider_min,
-                                   max_value=st.session_state.slider_max,
-                                   value=st.session_state.slider_val)
+                                   min_value=st.session_state.slider_min_daily,
+                                   max_value=st.session_state.slider_max_daily,
+                                   value=st.session_state.slider_val_daily)
 
 if reset_interval:
-    del st.session_state["slider_min"]
-    del st.session_state["slider_max"]
-    del st.session_state["slider_val"]
-    del st.session_state["start_date"]
+    del st.session_state["slider_min_daily"]
+    del st.session_state["slider_max_daily"]
+    del st.session_state["slider_val_daily"]
+    if 'start_date_daily' in st.session_state:
+        del st.session_state["start_date_daily"]
     st.rerun()
 
-if start_time > st.session_state.slider_min:
-    st.session_state.slider_min = start_time
-    st.session_state.slider_val[0] = start_time
+if start_time > st.session_state.slider_min_daily:
+    st.session_state.slider_min_daily = start_time
+    st.session_state.slider_val_daily[0] = start_time
     st.rerun()
 
-if end_time < st.session_state.slider_max:
-    st.session_state.slider_max = end_time
-    st.session_state.slider_val[1] = end_time
+if end_time < st.session_state.slider_max_daily:
+    st.session_state.slider_max_daily = end_time
+    st.session_state.slider_val_daily[1] = end_time
     st.rerun()
 
 match plot_selection:

@@ -36,7 +36,6 @@ if 'hourly_data' not in st.session_state:
 if 'device_type' not in st.session_state:
     user_agent = streamlit_js_eval(js_expressions="navigator.userAgent", key="ua")
     time.sleep(1)  # wait so that user_agent gets a value, should be after for some reason...
-    user_agent = None
 
     if user_agent:
         user_agent = user_agent.lower()

@@ -10,7 +10,7 @@ monthly_data = hourly_data.resample('ME').sum()
 
 plot_selection = st.pills(
     "Plot",
-    options=['Cost', 'Solar gain', 'YoY'],
+    options=['Cost', 'Consumption', 'Solar gain', 'YoY'],
     selection_mode="single",
     default='Cost',
 )
@@ -18,6 +18,8 @@ plot_selection = st.pills(
 match plot_selection:
     case "Cost":
         df_plot(monthly_data, column_names=['heating_cost', 'charging_cost', 'base_cost', 'total_cost'], y_label='SEK')
+    case "Consumption":
+        df_plot(monthly_data, column_names=['heating_kwh', 'charging_kwh', 'base_load_kwh', 'load_kwh'], y_label='kWh')        
     case "Solar gain":
         df_plot(monthly_data, column_names=['pv_total_gain', 'pv_sold', 'pv_saved_cost'], y_label='SEK')
     case "YoY":

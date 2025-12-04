@@ -2,22 +2,69 @@ import streamlit as st
 from datetime import datetime as dt
 from datetime import timedelta
 
+from pages.helper_functions import df_plot
+
 st.header("Hourly Energy Usage")
 
 hourly_data = st.session_state.hourly_data
 
-# get the latest time when all columns have data
-latest_time = hourly_data.apply(lambda col: col[(col != 0) & (~col.isna())].index.max()).min()
+earliest_time = hourly_data.index.to_pydatetime()[0]
+latest_time = hourly_data.index.to_pydatetime()[-1]
 
-[startDate, endDate] = st.date_input(label='Select Date Range', value=[latest_time-timedelta(days=2),latest_time])
+max_hours = timedelta(hours=st.session_state.max_datapoints)
 
-[startTime, endTime] = st.slider(label='Time interval',
-                                 min_value=dt(startDate.year, startDate.month, startDate.day),
-                                 max_value=dt(endDate.year, endDate.month, endDate.day),
-                                 value=[dt(startDate.year, startDate.month, startDate.day), dt(endDate.year, endDate.month, endDate.day)])
+plot_selection = st.pills(
+    "Plot",
+    options=['Cost', 'Consumption', 'Solar gain'],
+    selection_mode="single",
+    default='Cost',
+)
 
-st.line_chart(hourly_data[startTime:endTime], y=['charging_kwh', 'load_kwh', 'base_load_kwh', 'heating_kwh'])
-st.line_chart(hourly_data[startTime:endTime], y='heating_kwh')
-st.line_chart(hourly_data[startTime:endTime], y=['grid_sold_kwh'])
-st.line_chart(hourly_data[startTime:endTime], y=['price'])
-st.line_chart(hourly_data[startTime:endTime], y=['battery_charged_kwh', 'grid_bought_kwh', 'battery_charged_grid_kwh'])
+reset_interval = st.button('Reset interval')
+
+start_date = st.date_input(label='Start date',
+                           value=(latest_time - max_hours).date(),
+                           min_value=earliest_time.date(),
+                           max_value=latest_time.date())
+
+if 'start_date_hourly' not in st.session_state or st.session_state.start_date_hourly != start_date:
+    start_date_time = dt.combine(start_date, dt.min.time())
+    st.session_state.slider_min_hourly = start_date_time
+    st.session_state.start_date_hourly = start_date
+    st.session_state.slider_max_hourly = min(latest_time, start_date_time + max_hours)
+
+st.session_state.slider_val_hourly = [st.session_state.slider_min_hourly, st.session_state.slider_max_hourly]
+
+[start_time, end_time] = st.slider(label='Time interval',
+                                   key='slider_hourly',
+                                   min_value=st.session_state.slider_min_hourly,
+                                   max_value=st.session_state.slider_max_hourly,
+                                   value=st.session_state.slider_val_hourly)
+
+if reset_interval:
+    del st.session_state["slider_min_hourly"]
+    del st.session_state["slider_max_hourly"]
+    del st.session_state["slider_val_hourly"]
+    del st.session_state["start_date_hourly"]
+    st.rerun()
+
+if start_time > st.session_state.slider_min_hourly:
+    st.session_state.slider_min_hourly = start_time
+    st.session_state.slider_val_hourly[0] = start_time
+    st.rerun()
+
+if end_time < st.session_state.slider_max_hourly:
+    st.session_state.slider_max_hourly = end_time
+    st.session_state.slider_val_hourly[1] = end_time
+    st.rerun()
+
+match plot_selection:
+    case "Cost":
+        df_plot(hourly_data[start_time:end_time],
+                column_names=['heating_cost', 'charging_cost', 'base_cost', 'total_cost'], y_label='SEK')
+    case "Consumption":
+        df_plot(hourly_data[start_time:end_time],
+                column_names=['heating_kwh', 'charging_kwh', 'base_load_kwh', 'load_kwh'], y_label='kWh')
+    case "Solar gain":
+        df_plot(hourly_data[start_time:end_time], column_names=['pv_total_gain', 'pv_sold', 'pv_saved_cost'],
+                y_label='SEK')
