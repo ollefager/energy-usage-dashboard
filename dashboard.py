@@ -6,6 +6,8 @@ import requests
 import io
 import time
 
+from pages.helper_functions import simulate_night_charging_reallocate
+
 
 st.title("Energy Usage Dashboard")
 
@@ -16,6 +18,8 @@ headers = {
     "Authorization": f"token {github_token}",
     "Accept": "application/vnd.github.v3.raw"
 }
+
+st.set_page_config(layout="wide")
 
 if 'pv_data' not in st.session_state:
     pv_data_bytes = io.BytesIO(requests.get(data_storage_url + '/pv_data.pkl?ref=main', headers=headers).content)
@@ -33,6 +37,18 @@ if 'hourly_data' not in st.session_state:
     hourly_data_bytes = io.BytesIO(requests.get(data_storage_url + '/hourly_data.pkl?ref=main', headers=headers).content)
     st.session_state.hourly_data = pd.read_pickle(hourly_data_bytes)
 
+    daily_summary, hourly_simulated = simulate_night_charging_reallocate(
+        st.session_state.hourly_data,
+        target_start_hour=1,
+        target_end_hour=5,
+        night_start=0,
+        night_end=7,
+        kwh_col='charging_kwh',
+        price_series=(st.session_state.hourly_data['price'] + 0.8)
+    )
+    st.session_state.hourly_data['sim_charging_kwh'] = hourly_simulated['sim_charging_kwh']
+    st.session_state.hourly_data['sim_charging_cost'] = hourly_simulated['sim_charging_cost']
+
 if 'device_type' not in st.session_state:
     user_agent = streamlit_js_eval(js_expressions="navigator.userAgent", key="ua")
     time.sleep(1)  # wait so that user_agent gets a value, should be after for some reason...
@@ -44,7 +60,7 @@ if 'device_type' not in st.session_state:
             st.session_state.max_datapoints = 100
         else:
             st.session_state.device_type = 'computer'
-            st.session_state.max_datapoints = 1000
+            st.session_state.max_datapoints = 2000
     else:
         st.session_state.device_type = 'phone'
         st.session_state.max_datapoints = 100

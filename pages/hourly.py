@@ -61,10 +61,10 @@ if end_time < st.session_state.slider_max_hourly:
 match plot_selection:
     case "Cost":
         df_plot(hourly_data[start_time:end_time],
-                column_names=['heating_cost', 'charging_cost', 'base_cost', 'total_cost'], y_label='SEK')
+                column_names=['heating_cost', 'charging_cost', 'sim_charging_cost', 'base_cost', 'total_cost'], y_label='SEK')
     case "Consumption":
         df_plot(hourly_data[start_time:end_time],
-                column_names=['heating_kwh', 'charging_kwh', 'base_load_kwh', 'load_kwh'], y_label='kWh')
+                column_names=['heating_kwh', 'charging_kwh', 'sim_charging_kwh', 'base_load_kwh', 'load_kwh'], y_label='kWh')
     case "Solar gain":
         df_plot(hourly_data[start_time:end_time], column_names=['pv_total_gain', 'pv_sold', 'pv_saved_cost'],
                 y_label='SEK')
