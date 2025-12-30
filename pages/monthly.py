@@ -12,7 +12,7 @@ monthly_data['load_price'] = monthly_data['total_cost'] / monthly_data['load_kwh
 monthly_data['heating_price'] = monthly_data['heating_cost'] / monthly_data['heating_kwh']
 monthly_data['charging_price'] = monthly_data['charging_cost'] / monthly_data['charging_kwh']
 monthly_data['base_load_price'] = monthly_data['base_cost'] / monthly_data['base_load_kwh']
-monthly_data['sim_charging_price'] = monthly_data['sim_charging_cost'] / monthly_data['sim_charging_kwh']
+monthly_data['other_price'] = monthly_data['other_cost'] / monthly_data['other_kwh']
 
 plot_selection = st.pills(
     "Plot",
@@ -23,11 +23,11 @@ plot_selection = st.pills(
 
 match plot_selection:
     case "Cost":
-        df_plot(monthly_data, column_names=['heating_cost', 'charging_cost', 'base_cost', 'total_cost', 'sim_charging_cost'], y_label='SEK')
+        df_plot(monthly_data, column_names=['total_cost', 'base_cost', 'heating_cost', 'charging_cost', 'other_cost'], y_label='SEK')
     case "Consumption":
-        df_plot(monthly_data, column_names=['heating_kwh', 'charging_kwh', 'base_load_kwh', 'load_kwh', 'sim_charging_kwh'], y_label='kWh')
+        df_plot(monthly_data, column_names=['load_kwh', 'base_load_kwh', 'heating_kwh', 'charging_kwh', 'other_kwh'], y_label='kWh')
     case "Price":
-        df_plot(monthly_data, column_names=['heating_price', 'charging_price', 'base_load_price', 'load_price', 'sim_charging_price'], y_label='SEK/kWh')
+        df_plot(monthly_data, column_names=['load_price', 'base_load_price', 'heating_price', 'charging_price', 'other_price'], y_label='SEK/kWh')
     case "Solar gain":
         df_plot(monthly_data, column_names=['pv_total_gain', 'pv_sold', 'pv_saved_cost'], y_label='SEK')
     case "YoY":

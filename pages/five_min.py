@@ -158,4 +158,4 @@ for i in range(n_col):
 
         match plot_selection:
             case "Load":
-                df_plot(pv_data[start_time:end_time], column_names=['load_w', 'base_load_w'], y_label='W', y_range=[0, 10000], key=f'5min_plot_{i}')        
+                df_plot(pv_data[start_time:end_time], column_names=['load_w', 'base_load_w', 'heating_or_charging_w', 'other_w'], y_label='W', y_range=[0, 10000], key=f'5min_plot_{i}')

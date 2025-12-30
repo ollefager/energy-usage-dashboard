@@ -67,8 +67,8 @@ if end_time < st.session_state.slider_max_daily:
 
 match plot_selection:
     case "Cost":
-        df_plot(daily_data[start_time:end_time], column_names=['heating_cost', 'charging_cost', 'base_cost', 'total_cost'], y_label='SEK')
+        df_plot(daily_data[start_time:end_time], column_names=['total_cost', 'base_cost', 'heating_cost', 'charging_cost', 'other_cost'], y_label='SEK')
     case "Consumption":
-        df_plot(daily_data[start_time:end_time], column_names=['heating_kwh', 'charging_kwh', 'base_load_kwh', 'load_kwh'], y_label='kWh')
+        df_plot(daily_data[start_time:end_time], column_names=['load_kwh', 'base_load_kwh', 'heating_kwh', 'charging_kwh', 'other_kwh'], y_label='kWh')
     case "Solar gain":
         df_plot(daily_data[start_time:end_time], column_names=['pv_total_gain', 'pv_sold', 'pv_saved_cost'], y_label='SEK')

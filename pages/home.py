@@ -4,15 +4,29 @@ import pandas as pd
 hourly_data = st.session_state.hourly_data
 daily_data = hourly_data.resample('d').sum()
 
-last_update = st.session_state.hourly_data.index[-1]
-data_up_to_date = pd.Timestamp.today().date() == last_update.date()
+pv_data = st.session_state.pv_data
+ev_data = st.session_state.ev_data
+tibber_data = st.session_state.tibber_data
 
-if data_up_to_date:
-    text_color = 'green'
-else:
-    text_color = 'red'
+last_pv_update = st.session_state.hourly_data.index[-1]
+last_ev_update = st.session_state.ev_data.index[-1]
+last_tibber_update = st.session_state.tibber_data.index[-1]
 
-st.markdown(f":{text_color}-badge[:material/check: Data up to date] :{text_color}-badge[Last update: {last_update}]")
+pv_data_up_to_date = pd.Timestamp.today().date() == last_pv_update.date()
+ev_data_up_to_date = pd.Timestamp.today().date() == last_ev_update.date()
+tibber_data_up_to_date = pd.Timestamp.today().date() == last_tibber_update.date()
+
+with st.container():
+    for data in [[pv_data, 'PV'], [ev_data, 'EV'], [tibber_data, 'Tibber']]:
+        last_update = data[0].index[-1]
+        data_up_to_date = pd.Timestamp.today().date() == last_update.date()
+
+        if data_up_to_date:
+            text_color = 'green'
+        else:
+            text_color = 'red'
+
+        st.markdown(f":{text_color}-badge[:material/check: {data[1]} data up to date] :{text_color}-badge[Last update: {last_update}]")
 
 st.subheader("Cost yesterday")
 
