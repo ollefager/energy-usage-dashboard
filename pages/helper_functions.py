@@ -1,13 +1,22 @@
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import streamlit as st
+import pandas as pd
 
-
-def df_plot(data, column_names=None, title=None, y_label=None, key='df_plot', y_range=[None,None]):
-    fig = go.Figure()
+def df_plot(data, column_names=None, title=None, y_label=None, key='df_plot', y_range=[None,None], add_temp_and_price=False):
+    if add_temp_and_price:
+        fig = make_subplots(rows=2, cols=1, 
+                            shared_xaxes=True, 
+                            specs=[[{"secondary_y": True}], [{"secondary_y": False}]],
+                            row_heights=[0.3, 0.7], 
+                            vertical_spacing=0.05)
+    else:
+        fig = go.Figure()
 
     if column_names is None:
         column_names = data.columns
 
+    # only add markers if few data points to not clutter the plot
     if len(data.index) < 50:
         line_mode = 'lines+markers'
     else:
@@ -19,43 +28,93 @@ def df_plot(data, column_names=None, title=None, y_label=None, key='df_plot', y_
         else:
             legend_name = str(col_name)
 
+        if add_temp_and_price:
+            fig.add_trace(go.Scatter(
+                x=data.index,
+                y=data[col_name],
+                mode=line_mode,
+                name=legend_name,
+                legend='legend2',
+                marker=dict(size=6),
+                line=dict(width=2),
+                hoverinfo='y+x'),
+                row=2, col=1,
+                secondary_y=False)
+        else:
+            fig.add_trace(go.Scatter(
+                x=data.index,
+                y=data[col_name],
+                mode=line_mode,
+                name=legend_name,
+                marker=dict(size=6),
+                line=dict(width=2),
+                hoverinfo='y+x'))
+
+    if add_temp_and_price:
         fig.add_trace(go.Scatter(
             x=data.index,
-            y=data[col_name],
+            y=data['hdd'],
             mode=line_mode,
-            name=legend_name,
+            name='HDD',
+            legend='legend',
             marker=dict(size=6),
             line=dict(width=2),
-            hoverinfo='y+x',
-        ))
+            hoverinfo='y+x'),
+            row=1, col=1, 
+            secondary_y=False)
+        
+        fig.add_trace(go.Scatter(
+            x=data.index,
+            y=data['price'],
+            mode=line_mode,
+            name='Price',
+            legend='legend',
+            marker=dict(size=6),
+            line=dict(width=2),
+            hoverinfo='y+x'),
+            row=1, col=1,
+            secondary_y=True)
 
     if st.session_state.device_type == 'phone':
         hover_mode = 'x'
-        legend = dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=1)
+        legend = dict(orientation="h", yanchor="bottom", y=1.2, xanchor="right", x=1)
+        legend2 = dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=1)
         margin = dict(l=0, r=0, t=100, b=80)
     else:
         hover_mode = 'x unified'
-        legend = dict(orientation="h")
+        legend = dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0)
+        legend2 = dict(orientation="h")
         margin = dict(l=0, r=0, t=0, b=80)
 
-    fig.update_layout(
+    layout_kwargs = dict(
         hovermode=hover_mode,
         legend=legend,
         margin=margin,
         height=500
     )
+    if add_temp_and_price:
+        layout_kwargs['legend2'] = legend2
+
+    fig.update_layout(**layout_kwargs)
+
+    if add_temp_and_price:
+        hdd_min = min(data['hdd'].min()*0.9, data['price'].min()*0.9*10)
+        hdd_max = max(data['hdd'].max()*1.1, data['price'].max()*1.1*10)
+        fig.update_layout(hoversubplots="axis")
+        fig.update_yaxes(title_text=y_label, row=2, col=1)
+        fig.update_yaxes(title_text='°C', showgrid=True, row=1, col=1, secondary_y=False, range=[hdd_min, hdd_max])
+        fig.update_yaxes(title_text='SEK/kWh', showgrid=True, row=1, col=1, secondary_y=True, range=[hdd_min/10,hdd_max/10])
+    else:    
+        if y_label is not None:
+            fig.update_layout(yaxis=dict(title=dict(text=y_label),
+                                         range=y_range))
 
     if title is not None:
         margin.t = 40
         fig.update_layout(title=title, margin=margin)
 
-    if y_label is not None:
-        fig.update_layout(yaxis=dict(title=dict(text=y_label),
-                                     range=y_range))
-
     st.plotly_chart(fig, width='stretch', key=key)
 
-import pandas as pd
 
 def simulate_night_charging_reallocate(hourly_df,
                                        target_start_hour: int,

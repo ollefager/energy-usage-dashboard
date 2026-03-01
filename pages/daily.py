@@ -1,5 +1,4 @@
 import streamlit as st
-from datetime import timedelta as td
 from datetime import timedelta
 
 from pages.helper_functions import df_plot
@@ -8,19 +7,27 @@ st.header("Daily Energy Usage")
 
 hourly_data = st.session_state.hourly_data
 daily_data = hourly_data.resample('d').sum()
-pv_data = st.session_state.pv_data
+daily_data['hdd'] = (20 - hourly_data['out_temp']).clip(lower=0).resample('d').mean()
+daily_data['price'] = hourly_data['price'].resample('d').mean()
 
 earliest_date = daily_data.index.to_pydatetime()[0]
 latest_date = daily_data.index.to_pydatetime()[-1]
 
 max_days = timedelta(days=st.session_state.max_datapoints)
 
-plot_selection = st.pills(
-    "Plot",
-    options=['Cost', 'Consumption', 'Solar gain'],
-    selection_mode="single",
-    default='Cost',
-)
+col_pills, col_toggle = st.columns([4, 1])
+
+with col_pills:
+    plot_selection = st.pills(
+        "Plot",
+        options=['Cost', 'Consumption', 'Solar gain'],
+        selection_mode="single",
+        default='Cost',
+        label_visibility='collapsed',
+    )
+
+with col_toggle:
+    show_temp_price = st.toggle("Temp & Price", value=False)
 
 reset_interval = st.button('Reset interval')
 
@@ -67,8 +74,8 @@ if end_time < st.session_state.slider_max_daily:
 
 match plot_selection:
     case "Cost":
-        df_plot(daily_data[start_time:end_time], column_names=['total_cost', 'base_cost', 'heating_cost', 'charging_cost', 'other_cost'], y_label='SEK')
+        df_plot(daily_data[start_time:end_time], column_names=['total_cost', 'base_cost', 'heating_cost', 'charging_cost', 'other_cost'], y_label='SEK', add_temp_and_price=show_temp_price)
     case "Consumption":
-        df_plot(daily_data[start_time:end_time], column_names=['load_kwh', 'base_load_kwh', 'heating_kwh', 'charging_kwh', 'other_kwh'], y_label='kWh')
+        df_plot(daily_data[start_time:end_time], column_names=['load_kwh', 'base_load_kwh', 'heating_kwh', 'charging_kwh', 'other_kwh'], y_label='kWh', add_temp_and_price=show_temp_price)
     case "Solar gain":
-        df_plot(daily_data[start_time:end_time], column_names=['pv_total_gain', 'pv_sold', 'pv_saved_cost'], y_label='SEK')
+        df_plot(daily_data[start_time:end_time], column_names=['pv_total_gain', 'pv_sold', 'pv_saved_cost'], y_label='SEK', add_temp_and_price=show_temp_price)

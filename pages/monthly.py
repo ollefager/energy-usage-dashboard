@@ -13,23 +13,32 @@ monthly_data['heating_price'] = monthly_data['heating_cost'] / monthly_data['hea
 monthly_data['charging_price'] = monthly_data['charging_cost'] / monthly_data['charging_kwh']
 monthly_data['base_load_price'] = monthly_data['base_cost'] / monthly_data['base_load_kwh']
 monthly_data['other_price'] = monthly_data['other_cost'] / monthly_data['other_kwh']
+monthly_data['price'] = hourly_data['price'].resample('ME').mean()
+monthly_data['hdd'] = (20 - hourly_data['out_temp']).clip(lower=0).resample('ME').mean()
 
-plot_selection = st.pills(
-    "Plot",
-    options=['Cost', 'Consumption', 'Price', 'Solar gain', 'YoY'],
-    selection_mode="single",
-    default='Cost',
-)
+col_pills, col_toggle = st.columns([4, 1])
+
+with col_pills:
+    plot_selection = st.pills(
+        "Plot",
+        options=['Cost', 'Consumption', 'Price', 'Solar gain', 'YoY'],
+        selection_mode="single",
+        default='Cost',
+        label_visibility='collapsed',
+    )
+
+with col_toggle:
+    show_temp_price = st.toggle("Temp & Price", value=False)
 
 match plot_selection:
     case "Cost":
-        df_plot(monthly_data, column_names=['total_cost', 'base_cost', 'heating_cost', 'charging_cost', 'other_cost'], y_label='SEK')
+        df_plot(monthly_data, column_names=['total_cost', 'base_cost', 'heating_cost', 'charging_cost', 'other_cost'], y_label='SEK', add_temp_and_price=show_temp_price)
     case "Consumption":
-        df_plot(monthly_data, column_names=['load_kwh', 'base_load_kwh', 'heating_kwh', 'charging_kwh', 'other_kwh'], y_label='kWh')
+        df_plot(monthly_data, column_names=['load_kwh', 'base_load_kwh', 'heating_kwh', 'charging_kwh', 'other_kwh'], y_label='kWh', add_temp_and_price=show_temp_price)
     case "Price":
-        df_plot(monthly_data, column_names=['load_price', 'base_load_price', 'heating_price', 'charging_price', 'other_price'], y_label='SEK/kWh')
+        df_plot(monthly_data, column_names=['load_price', 'base_load_price', 'heating_price', 'charging_price', 'other_price'], y_label='SEK/kWh', add_temp_and_price=show_temp_price)
     case "Solar gain":
-        df_plot(monthly_data, column_names=['pv_total_gain', 'pv_sold', 'pv_saved_cost'], y_label='SEK')
+        df_plot(monthly_data, column_names=['pv_total_gain', 'pv_sold', 'pv_saved_cost'], y_label='SEK', add_temp_and_price=show_temp_price)
     case "YoY":
         option = st.selectbox('Data', monthly_data.columns, index=1, label_visibility='collapsed')
 

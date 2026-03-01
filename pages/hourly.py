@@ -7,19 +7,26 @@ from pages.helper_functions import df_plot
 st.header("Hourly Energy Usage")
 
 hourly_data = st.session_state.hourly_data
-
+hourly_data['hdd'] = (20 - hourly_data['out_temp']).clip(lower=0)
 
 earliest_time = hourly_data.index.to_pydatetime()[0]
 latest_time = hourly_data.index.to_pydatetime()[-1]
 
 max_hours = timedelta(hours=st.session_state.max_datapoints)
 
-plot_selection = st.pills(
-    "Plot",
-    options=['Cost', 'Consumption', 'Solar gain'],
-    selection_mode="single",
-    default='Cost',
-)
+col_pills, col_toggle = st.columns([4, 1])
+
+with col_pills:
+    plot_selection = st.pills(
+        "Plot",
+        options=['Cost', 'Consumption', 'Solar gain'],
+        selection_mode="single",
+        default='Cost',
+        label_visibility='collapsed',
+    )
+
+with col_toggle:
+    show_temp_price = st.toggle("Temp & Price", value=False)
 
 reset_interval = st.button('Reset interval')
 
@@ -62,10 +69,10 @@ if end_time < st.session_state.slider_max_hourly:
 match plot_selection:
     case "Cost":
         df_plot(hourly_data[start_time:end_time],
-                column_names=['total_cost', 'base_cost', 'heating_cost', 'charging_cost', 'other_cost'], y_label='SEK')
+                column_names=['total_cost', 'base_cost', 'heating_cost', 'charging_cost', 'other_cost'], y_label='SEK', add_temp_and_price=show_temp_price)
     case "Consumption":
         df_plot(hourly_data[start_time:end_time],
-                column_names=['load_kwh', 'base_load_kwh', 'heating_kwh', 'charging_kwh', 'other_kwh'], y_label='kWh')
+                column_names=['load_kwh', 'base_load_kwh', 'heating_kwh', 'charging_kwh', 'other_kwh'], y_label='kWh', add_temp_and_price=show_temp_price)
     case "Solar gain":
         df_plot(hourly_data[start_time:end_time], column_names=['pv_total_gain', 'pv_sold', 'pv_saved_cost'],
-                y_label='SEK')
+                y_label='SEK', add_temp_and_price=show_temp_price)
