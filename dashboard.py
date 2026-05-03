@@ -37,17 +37,17 @@ if 'hourly_data' not in st.session_state:
     hourly_data_bytes = io.BytesIO(requests.get(data_storage_url + '/hourly_data.pkl?ref=main', headers=headers).content)
     st.session_state.hourly_data = pd.read_pickle(hourly_data_bytes)
 
-    daily_summary, hourly_simulated = simulate_night_charging_reallocate(
-        st.session_state.hourly_data,
-        target_start_hour=1,
-        target_end_hour=5,
-        night_start=0,
-        night_end=7,
-        kwh_col='charging_kwh',
-        price_series=(st.session_state.hourly_data['price'] + 0.8)
-    )
-    st.session_state.hourly_data['sim_charging_kwh'] = hourly_simulated['sim_charging_kwh']
-    st.session_state.hourly_data['sim_charging_cost'] = hourly_simulated['sim_charging_cost']
+    # daily_summary, hourly_simulated = simulate_night_charging_reallocate(
+    #     st.session_state.hourly_data,
+    #     target_start_hour=1,
+    #     target_end_hour=5,
+    #     night_start=0,
+    #     night_end=7,
+    #     kwh_col='charging_kwh',
+    #     price_series=(st.session_state.hourly_data['price'] + 0.8)
+    # )
+    # st.session_state.hourly_data['sim_charging_kwh'] = hourly_simulated['sim_charging_kwh']
+    # st.session_state.hourly_data['sim_charging_cost'] = hourly_simulated['sim_charging_cost']
 
 if 'device_type' not in st.session_state:
     user_agent = streamlit_js_eval(js_expressions="navigator.userAgent", key="ua")
